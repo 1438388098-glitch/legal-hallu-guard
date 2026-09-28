@@ -61,6 +61,22 @@ class GuardTest(unittest.TestCase):
         self.assertEqual(defect_rate([])["total"], 0)
         self.assertEqual(check_answer("", self.index), [])
 
+    def test_duplicate_article_keys_keep_all_variants(self):
+        # 真实语料中同一（法名，条号）可能出现多次且文本不同（如历次修订快照）。
+        # 引文与任一版本逐字一致都不应误报（判定与语料行序无关）；两个版本都没有才报。
+        corpus = [
+            {"id": 1, "law": u"修订法", "num": u"第一条", "text": u"旧版本文本：罚款一千元。"},
+            {"id": 2, "law": u"修订法", "num": u"第一条", "text": u"新版本文本：罚款一万元。"},
+        ]
+        index = build_index(corpus)
+        self.assertEqual(len(index[(u"修订法", u"第一条")]), 2)
+        self.assertEqual(
+            [f["rule_id"] for f in check_answer(u"根据【修订法 第一条｜罚款一千元。】", index)], [])
+        self.assertEqual(
+            [f["rule_id"] for f in check_answer(u"根据【修订法 第一条｜罚款一万元。】", index)], [])
+        rules = {f["rule_id"] for f in check_answer(u"根据【修订法 第一条｜罚款十万元。】", index)}
+        self.assertEqual(rules, {RULE_QUOTE})
+
 
 if __name__ == "__main__":
     unittest.main()

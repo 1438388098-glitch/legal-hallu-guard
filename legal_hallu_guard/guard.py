@@ -31,9 +31,16 @@ def _norm(s):
 
 
 def build_index(corpus):
-    """{(法名, 条号): 条文文本} —— corpus 为 statute-rag importer.load_corpus 的产物，
-    或任何含 law/num/text 字段的 dict 列表。"""
-    return {(x["law"], x["num"]): x["text"] for x in corpus}
+    """{(法名, 条号): [条文文本, …]} —— corpus 为 statute-rag importer.load_corpus 的产物，
+    或任何含 law/num/text 字段的 dict 列表。
+
+    真实语料中同一（法名，条号）可能出现多次（如同一法律的历次修订快照），
+    全部保留：引文保真对任一版本成立即通过，判定与语料行序无关。
+    """
+    index = {}
+    for x in corpus:
+        index.setdefault((x["law"], x["num"]), []).append(x["text"])
+    return index
 
 
 def check_answer(answer, index, check_exists=True, check_quote=True, check_claim=True):
@@ -57,8 +64,8 @@ def check_answer(answer, index, check_exists=True, check_quote=True, check_claim
             })
             continue
         if check_quote and quote and key in index:
-            article = _norm(index[key])
-            if _norm(quote) not in article:
+            # 同一（法名，条号）在语料中有多个版本时，与任一版本逐字一致即算保真
+            if all(_norm(quote) not in _norm(text) for text in index[key]):
                 findings.append({
                     "rule_id": RULE_QUOTE, "severity": "P0",
                     "position": m.start(),

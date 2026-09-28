@@ -1,0 +1,56 @@
+{
+  "meta": {
+    "kind": "constructed evaluation (no model generation)",
+    "corpus_path": "D:/Claudeworkspace/statute-rag/data/corpus.jsonl",
+    "corpus_articles": 14212,
+    "corpus_laws": 238,
+    "seed": 20260928,
+    "misquoted_skipped": 0,
+    "sizes": {
+      "grounded": 250,
+      "fabricated": 120,
+      "misquoted": 120,
+      "uncited": 60
+    }
+  },
+  "groups": {
+    "grounded": {
+      "n": 250,
+      "flagged": 0,
+      "expected_rule_hits": 0,
+      "by_rule": {},
+      "unexpected": [],
+      "fp_rate": 0.0
+    },
+    "fabricated": {
+      "n": 120,
+      "flagged": 120,
+      "expected_rule_hits": 120,
+      "by_rule": {
+        "FABRICATED_CITATION": 120
+      },
+      "unexpected": [],
+      "detection_rate": 1.0
+    },
+    "misquoted": {
+      "n": 120,
+      "flagged": 120,
+      "expected_rule_hits": 120,
+      "by_rule": {
+        "MISQUOTED_TEXT": 120
+      },
+      "unexpected": [],
+      "detection_rate": 1.0
+    },
+    "uncited": {
+      "n": 60,
+      "flagged": 60,
+      "expected_rule_hits": 60,
+      "by_rule": {
+        "UNCITED_CLAIM": 60
+      },
+      "unexpected": [],
+      "detection_rate": 1.0
+    }
+  }
+}
