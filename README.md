@@ -4,7 +4,7 @@ English · [简体中文](./README.zh-CN.md)
 
 Deterministic citation checks for legal Q&A answers that carry citation markers: it catches the outputs that "look professional but cite fake law" — citing nonexistent articles, stitched-up or reworded quotations, and assertions with no citation behind them. Paired with a wrong-citation-rate metric, it turns "knowing the answers' limits" from a spoken claim into a measurable number. No model judgment involved — the wrong-citation rate becomes a metric instead of a vibe.
 
-**Current version v0.1: three deterministic checks + a self-check on fictional cases. The citation schema is aligned with the Citation structure of [statute-rag](https://github.com/1438388098-glitch/statute-rag), so this tool can consume its exported corpus directly. Zero dependencies — Python standard library only.**
+**Current version v0.2: three deterministic checks + a self-check on fictional cases + a constructed baseline on the real corpus — 14,212 real articles: FP 0.0%, fabricated / misquoted / uncited detection all 100%. The citation schema is aligned with the Citation structure of [statute-rag](https://github.com/1438388098-glitch/statute-rag), so this tool can consume its exported corpus directly. Zero dependencies — Python standard library only.**
 
 ## The problem
 
@@ -41,6 +41,8 @@ Design decision: a sentence counts as supported if it **overlaps** any citation 
 python scripts/run_checks.py cases/selftest.jsonl
 # run against your own corpus (statute-rag export format, JSONL)
 python scripts/run_checks.py cases/selftest.jsonl --corpus data/corpus.jsonl
+# run the constructed-evaluation baseline on a real corpus (deterministic, no model; see docs/baseline-report.md)
+python scripts/run_baseline_eval.py --corpus /path/to/corpus.jsonl --out docs/baseline-metrics.json
 ```
 
 The case file is JSONL with `answer_id` / `answer` fields.
@@ -60,9 +62,26 @@ Each of the three checks can be switched off individually (`check_exists` / `che
 
 ### Tests
 
-8 unit tests: `python -m unittest discover -s tests`. CI runs the same suite on Python 3.9 and 3.13.
+9 unit tests: `python -m unittest discover -s tests`. CI runs the same suite on Python 3.9 and 3.13.
 
-## Self-check on fictional cases (no numbers pre-filled for real data)
+## Verification
+
+### Constructed baseline on the real corpus (v0.2 · constructed evaluation, no model in the loop)
+
+550 answers built by deterministic rules over statute-rag's real corpus (14,212 articles, 238 laws and judicial interpretations), fixed seed for reproducibility:
+
+| Group | n | Rate |
+|---|---|---|
+| grounded (faithful quote + correct citation) | 250 | FP **0.0%** |
+| fabricated (cites a nonexistent article no.) | 120 | detection **100.0%** |
+| misquoted (number swap / synonym / stitched rewrite) | 120 | detection **100.0%** |
+| uncited (assertion without citation) | 60 | detection **100.0%** |
+
+The first run exposed a real guard bug: when the corpus contains duplicate (law name, article no.) entries, the index silently kept the last text, making verdicts depend on JSONL line order — 2.0% false positives. Fixed (the index now keeps all variants; a quote matching any variant counts as faithful) and locked with a regression test. Method, per-item FP analysis and boundary statements: [docs/baseline-report.md](./docs/baseline-report.md).
+
+Reproduce: `python scripts/run_baseline_eval.py --out docs/baseline-metrics.json` (the corpus is read in place, never copied into this repo).
+
+### Self-check on fictional cases (v0.1, minimal smoke test)
 
 | Case | Expected rule | Actual |
 |---|---|---|
@@ -76,7 +95,7 @@ Each of the three checks can be switched off individually (`check_exists` / `che
 
 ## Roadmap
 
-- **v0.2**: ingest statute-rag's real corpus (14,212 articles), run batch checks on real Q&A outputs, and produce a wrong-citation-rate baseline; extend the assertion vocabulary by domain; chain with clause-scope risk points (risk warnings automatically carry their statutory basis, re-checked by this tool)
+- **v0.2**: ✅ done — ingested statute-rag's real corpus (14,212 articles), ran batch checks and produced a wrong-citation-rate baseline (constructed evaluation: FP 0.0%, fabricated/misquoted/uncited detection all 100%, [report](./docs/baseline-report.md)). Remaining: evaluation on real model Q&A outputs (requires a model API); domain-specific assertion vocabulary; chaining with clause-scope risk points (risk warnings automatically carry their statutory basis, re-checked by this tool)
 - **v0.3**: evaluation of "refuse to answer when retrieval finds nothing" strategies; a hallucination-guard regression set
 
 ## License

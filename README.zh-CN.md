@@ -4,7 +4,7 @@
 
 对「带引用标记的法律答案」做**确定性引用校验**，抓「看起来很专业但引用是假的」的输出——引用不存在的条文、引文拼接改写、断言无引用支撑。配套错误引用率指标，让「懂边界」从口说变成可测量；全程无模型判断，错误引用率是可测的指标，不是感觉。
 
-**当前版本 v0.1：三类确定性校验 + 虚构案例自检。与 statute-rag 的 Citation 结构对齐，可直接消费其导出语料。零依赖，仅用 Python 标准库。**
+**当前版本 v0.2：三类确定性校验 + 虚构案例自检 + 真实语料构造基线——14,212 条真实法条上 FP=0.0%，fabricated / misquoted / uncited 检出率均 100%。与 statute-rag 的 Citation 结构对齐，可直接消费其导出语料。零依赖，仅用 Python 标准库。**
 
 ## 问题
 
@@ -40,6 +40,8 @@
 python scripts/run_checks.py cases/selftest.jsonl
 # 用自备语料跑（statute-rag 导出格式，JSONL）
 python scripts/run_checks.py cases/selftest.jsonl --corpus data/corpus.jsonl
+# 在真实语料上跑构造评测基线（确定性构造，无模型；详见 docs/baseline-report.md）
+python scripts/run_baseline_eval.py --corpus /path/to/corpus.jsonl --out docs/baseline-metrics.json
 ```
 
 案例文件为 JSONL，字段 `answer_id` / `answer`。
@@ -59,9 +61,26 @@ metrics = defect_rate(results)          # {"defect_rate", "defective", "total", 
 
 ### 测试
 
-单元测试 8 例：`python -m unittest discover -s tests`。CI 在 Python 3.9 与 3.13 上运行同一套测试。
+单元测试 9 例：`python -m unittest discover -s tests`。CI 在 Python 3.9 与 3.13 上运行同一套测试。
 
-## 验证（虚构案例自检，非虚构数字不预填）
+## 验证
+
+### 真实语料构造基线（v0.2 · 构造评测，无模型）
+
+在 statute-rag 真实语料（14,212 条 / 238 部法律法规及司法解释）上以确定性规则构造 550 条答案跑批量校验，固定种子可复现：
+
+| 组别 | n | 比率 |
+|---|---|---|
+| grounded（引文保真+引用正确） | 250 | 误报 FP **0.0%** |
+| fabricated（引不存在条号） | 120 | 检出 **100.0%** |
+| misquoted（数字替换/同义词/拼接改写） | 120 | 检出 **100.0%** |
+| uncited（断言无引用） | 60 | 检出 **100.0%** |
+
+首轮实跑曾暴露一个真 bug：语料中同一（法名，条号）重复时索引「后者覆盖前者」，判定随行序翻转，误报 2.0%——已修复（索引保留全部版本，与任一版本文本一致即算保真）并锁定回归测试。方法、逐条误报分析与边界声明见 [docs/baseline-report.md](./docs/baseline-report.md)。
+
+复现：`python scripts/run_baseline_eval.py --out docs/baseline-metrics.json`（语料只读引用，不复制进本仓库）。
+
+### 虚构案例自检（v0.1，最小冒烟）
 
 | 案例 | 期望触发 | 实际 |
 |---|---|---|
@@ -75,7 +94,7 @@ metrics = defect_rate(results)          # {"defect_rate", "defective", "total", 
 
 ## Roadmap
 
-- **v0.2**：接入 [statute-rag](https://github.com/1438388098-glitch/statute-rag) 真实语料（14,212 条），对真实问答输出跑批量校验，产出「错误引用率基线」；断言词表领域化扩展；与 clause-scope 风险点串联（风险提示自动携带法条依据并由本工具复核）
+- **v0.2**：✅ 已完成——接入 [statute-rag](https://github.com/1438388098-glitch/statute-rag) 真实语料（14,212 条）跑批量校验，产出「错误引用率基线」（构造评测，FP=0.0%，三类检出均 100%，[报告](./docs/baseline-report.md)）。待办：对真实模型问答输出的评测（需模型 API）；断言词表领域化扩展；与 clause-scope 风险点串联（风险提示自动携带法条依据并由本工具复核）
 - **v0.3**：「检索不到就拒答」策略评测、幻觉护栏回归集
 
 ## License
