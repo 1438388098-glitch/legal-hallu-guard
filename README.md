@@ -1,5 +1,7 @@
 # legal-hallu-guard · 法律答案引用护栏
 
+> **English TL;DR** — Deterministic citation guardrails for legal Q&A outputs: three pure-function checks (cited article exists / quotation fidelity / assertion coverage) that catch "professional-looking answers citing laws that don't exist". No model judgment involved — the wrong-citation rate becomes a measurable metric instead of a vibe. Citation schema aligned with [statute-rag](https://github.com/1438388098-glitch/statute-rag); zero dependencies.
+
 对「带引用标记的法律答案」做**确定性引用校验**，抓「看起来很专业但引用是假的」的输出——引用不存在的条文、引文拼接改写、断言无引用支撑。配套错误引用率指标，让「懂边界」从口说变成可测量。
 
 **当前版本 v0.1：三类确定性校验 + 虚构案例自检。与 statute-rag 的 Citation 结构对齐，可直接消费其导出语料。**
