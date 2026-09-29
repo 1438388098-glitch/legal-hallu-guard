@@ -79,7 +79,7 @@ Each of the three checks can be switched off individually (`check_exists` / `che
 
 The first run exposed a real guard bug: when the corpus contains duplicate (law name, article no.) entries, the index silently kept the last text, making verdicts depend on JSONL line order — 2.0% false positives. Fixed (the index now keeps all variants; a quote matching any variant counts as faithful) and locked with a regression test. Method, per-item FP analysis and boundary statements: [docs/baseline-report.md](./docs/baseline-report.md).
 
-Reproduce: `python scripts/run_baseline_eval.py --out docs/baseline-metrics.json` (the corpus is read in place, never copied into this repo).
+Reproduce: `python scripts/run_baseline_eval.py --corpus <statute-rag>/data/corpus.jsonl --out docs/baseline-metrics.json` (the corpus is not in this repo — point `--corpus` at statute-rag's `data/corpus.jsonl`; it is read in place, never copied into this repo).
 
 ### Self-check on fictional cases (v0.1, minimal smoke test)
 

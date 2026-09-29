@@ -13,8 +13,8 @@
   uncited     取真实条文中含断言词的句子作为无引用断言 → 测检出率
 
 用法：
-  py -3.13 scripts/run_baseline_eval.py                       # 默认语料路径
-  py -3.13 scripts/run_baseline_eval.py --corpus <path> --out <json>
+  py -3.13 scripts/run_baseline_eval.py --corpus <statute-rag>/data/corpus.jsonl --out <json>
+  （语料不在本仓库，必须用 --corpus 指向 statute-rag 仓导出的 data/corpus.jsonl）
 """
 import argparse
 import io
@@ -29,7 +29,7 @@ from legal_hallu_guard.guard import (
     CLAIM_PAT, _norm, build_index, check_answer,
 )
 
-DEFAULT_CORPUS = "D:/Claudeworkspace/statute-rag/data/corpus.jsonl"
+DEFAULT_CORPUS = None  # 语料不在本仓库，必须显式传 --corpus
 DEFAULT_SEED = 20260928
 
 CN_DIGITS = "零一二三四五六七八九"
@@ -259,6 +259,10 @@ def main():
     parser.add_argument("--uncited", type=int, default=60)
     parser.add_argument("--out", help=u"汇总 JSON 输出路径（缺省只打印）")
     args = parser.parse_args()
+
+    if not args.corpus:
+        print(u"[!] 未指定语料：本仓库不含语料文件，请用 --corpus 指向 statute-rag 仓的 data/corpus.jsonl，见 README。")
+        raise SystemExit(2)
 
     corpus = load_corpus(args.corpus)
     index = build_index(corpus)

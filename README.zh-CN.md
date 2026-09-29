@@ -78,7 +78,7 @@ metrics = defect_rate(results)          # {"defect_rate", "defective", "total", 
 
 首轮实跑曾暴露一个真 bug：语料中同一（法名，条号）重复时索引「后者覆盖前者」，判定随行序翻转，误报 2.0%——已修复（索引保留全部版本，与任一版本文本一致即算保真）并锁定回归测试。方法、逐条误报分析与边界声明见 [docs/baseline-report.md](./docs/baseline-report.md)。
 
-复现：`python scripts/run_baseline_eval.py --out docs/baseline-metrics.json`（语料只读引用，不复制进本仓库）。
+复现：`python scripts/run_baseline_eval.py --corpus <statute-rag>/data/corpus.jsonl --out docs/baseline-metrics.json`（语料不在本仓库，用 `--corpus` 指向 statute-rag 仓的 `data/corpus.jsonl`；只读引用，不复制进本仓库）。
 
 ### 虚构案例自检（v0.1，最小冒烟）
 
