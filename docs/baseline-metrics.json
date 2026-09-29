@@ -1,7 +1,7 @@
 {
   "meta": {
     "kind": "constructed evaluation (no model generation)",
-    "corpus_path": "D:/Claudeworkspace/statute-rag/data/corpus.jsonl",
+    "corpus_path": "<statute-rag>/data/corpus.jsonl",
     "corpus_articles": 14212,
     "corpus_laws": 238,
     "seed": 20260928,
