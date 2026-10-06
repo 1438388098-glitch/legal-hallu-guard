@@ -1,5 +1,7 @@
 English · [简体中文](./README.zh-CN.md)
 
+[![CI](https://github.com/1438388098-glitch/legal-hallu-guard/actions/workflows/ci.yml/badge.svg)](https://github.com/1438388098-glitch/legal-hallu-guard/actions/workflows/ci.yml)
+
 # legal-hallu-guard · Citation Guardrails for Legal Answers
 
 Deterministic citation checks for legal Q&A answers that carry citation markers: it catches the outputs that "look professional but cite fake law" — citing nonexistent articles, stitched-up or reworded quotations, and assertions with no citation behind them. Paired with a wrong-citation-rate metric, it turns "knowing the answers' limits" from a spoken claim into a measurable number. No model judgment involved — the wrong-citation rate becomes a metric instead of a vibe.

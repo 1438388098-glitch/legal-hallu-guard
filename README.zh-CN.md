@@ -1,5 +1,7 @@
 [English](./README.md) · 简体中文
 
+[![CI](https://github.com/1438388098-glitch/legal-hallu-guard/actions/workflows/ci.yml/badge.svg)](https://github.com/1438388098-glitch/legal-hallu-guard/actions/workflows/ci.yml)
+
 # legal-hallu-guard · 法律答案引用护栏
 
 对「带引用标记的法律答案」做**确定性引用校验**，抓「看起来很专业但引用是假的」的输出——引用不存在的条文、引文拼接改写、断言无引用支撑。配套错误引用率指标，让「懂边界」从口说变成可测量；全程无模型判断，错误引用率是可测的指标，不是感觉。
